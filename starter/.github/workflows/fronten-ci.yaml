@@ -1,16 +1,11 @@
 name: Frontend Continuous Integration
 
 on:
-  push:
+  pull_request:
     branches:
       - main
     paths:
-      - 'frontend/***'
-  pull_request:
-    branches:
-      -main
-    paths:
-     - 'frontend/**'
+      - 'starter/frontend/**'
   workflow_dispatch:
 
 jobs:
@@ -19,7 +14,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend
+        working-directory: starter/frontend
 
     steps:
       - name: Checkout code
@@ -28,12 +23,12 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version-file: frontend/.nvmrc
+          node-version-file: starter/frontend/.nvmrc
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run lint
         run: npm run lint
@@ -43,7 +38,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: frontend
+        working-directory: starter/frontend
 
     steps:
       - name: Checkout code
@@ -52,40 +47,32 @@ jobs:
       - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version-file: frontend/.nvmrc
+          node-version-file: starter/frontend/.nvmrc
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: starter/frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run tests
-        run: npm run test
+        run: CI=true npm test
 
-    build:
+  build:
     runs-on: ubuntu-latest
     needs:
       - lint
       - test
 
+    env:
+      REACT_APP_MOVIE_API_URL: http://localhost:5000
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: frontend/.nvmrc
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm install
-
-      - name: Run tests
-        working-directory: frontend
-        run: npm run test
-
       - name: Build Docker image
-        run: docker build -t frontend-app ./frontend
+        run: |
+          docker build \
+            --build-arg REACT_APP_MOVIE_API_URL="$REACT_APP_MOVIE_API_URL" \
+            -t frontend-app \
+            ./starter/frontends
