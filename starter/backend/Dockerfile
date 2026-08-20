@@ -1,4 +1,5 @@
-FROM python:3.10-slim  # Changed from 3.10-alpine
+# Build stage: Changed from 3.10-alpine
+FROM python:3.10-slim
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
