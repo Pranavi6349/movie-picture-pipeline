@@ -1,43 +1,73 @@
-python3 -c "from pathlib import Path; Path('starter/.github/workflows/backend-ci.yaml').write_text('''name: Backend CI
+name: Backend Continuous Integration
+
 on:
   pull_request:
     branches:
       - main
     paths:
-      - \"starter/backend/**\"
+      - "starter/backend/**"
   workflow_dispatch:
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: \"3.10\"
-      - run: pip install pipenv
-      - working-directory: starter/backend
+          python-version: "3.10"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        working-directory: starter/backend
         run: pipenv install
-      - working-directory: starter/backend
+
+      - name: Run linter
+        working-directory: starter/backend
         run: pipenv run lint
 
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: \"3.10\"
-      - run: pip install pipenv
-      - working-directory: starter/backend
+          python-version: "3.10"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        working-directory: starter/backend
         run: pipenv install
-      - working-directory: starter/backend
+
+      - name: Run tests
+        working-directory: starter/backend
         run: pipenv run test
 
   build:
-    needs: [lint, test]
+    needs:
+      - lint
+      - test
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        working-directory: starter/backend
+        run: docker build -t backend-app .
+
       - working-directory: starter/backend
         run: docker build -t backend-app .
