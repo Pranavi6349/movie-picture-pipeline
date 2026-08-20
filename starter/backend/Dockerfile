@@ -1,15 +1,13 @@
-FROM public.ecr.aws/docker/library/python:3.10-alpine
+FROM python:3.10-slim  # Changed from 3.10-alpine
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
-RUN adduser -u 1000 -D app
-RUN apk update && \
-  apk add \
-  pcre \
-  pcre-dev \
-  build-base \
-  gcc \
-  linux-headers \
+RUN useradd -u 1000 -m app  # Changed from adduser for Debian compatibility
+RUN apt-get update && \
+  apt-get install -y \
+  build-essential \
+  libpcre3 \
+  libpcre3-dev \
   openssl \
   libffi-dev \
   && pip install pipenv
