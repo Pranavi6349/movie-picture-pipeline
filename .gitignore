@@ -1,0 +1,8 @@
+#terraform files
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+#environment/secret files
+*.env
+aws_temp.env
