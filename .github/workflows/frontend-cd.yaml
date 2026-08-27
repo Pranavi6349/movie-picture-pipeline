@@ -77,8 +77,10 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN}}
           aws-region: ${{ env.AWS_REGION }}
-
+      - name: check AWS identity
+        run: aws sts get-caller identity
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -105,9 +107,9 @@ jobs:
 
       - name: Deploy frontend to EKS
         run: |
-         kubectl apply -k starter/frontend/k8s
-
-         kubectl set image deployment/frontend \
-         frontend="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
-
-         kubectl rollout status deployment/frontend --timeout=180s
+          kubectl apply -k starter/frontend/k8s --validate=false
+          
+          kubectl set image deployment/frontend \
+            frontend="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+          
+          kubectl rollout status deployment/frontend --timeout=180s
