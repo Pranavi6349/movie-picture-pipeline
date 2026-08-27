@@ -105,8 +105,10 @@ jobs:
             --name "$EKS_CLUSTER_NAME"
 
       - name: Deploy frontend to EKS
-        run: |
-          kubectl set image deployment/frontend \
-            frontend="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+  run: |
+    kubectl apply -k starter/frontend/k8s
 
-          kubectl rollout status deployment/frontend --timeout=180s
+    kubectl set image deployment/frontend \
+      frontend="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
+
+    kubectl rollout status deployment/frontend --timeout=180s
