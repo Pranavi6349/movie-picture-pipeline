@@ -63,4 +63,18 @@ jobs:
           kubectl set image deployment/frontend \
             frontend="${{ steps.login-ecr.outputs.registry }}/${ECR_REPOSITORY}:${GITHUB_SHA}"
 
-          kubectl rollout status deployment/frontend --timeout=180s
+          if ! kubectl rollout status deployment/frontend --timeout=180s; then
+            echo "===== DEPLOYMENT STATUS ====="
+            kubectl get deployment frontend -o wide
+
+            echo "===== PODS ====="
+            kubectl get pods -l app=frontend -o wide
+
+            echo "===== POD DETAILS ====="
+            kubectl describe pods -l app=frontend
+
+            echo "===== RECENT EVENTS ====="
+            kubectl get events --sort-by=.lastTimestamp | tail -30
+
+            exit 1
+          fi
